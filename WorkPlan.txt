@@ -1,0 +1,63 @@
+План работы:
+	
+Описание:
+	GameLoop order - 
+		Initialization once 
+		in loop 
+			timer start
+			phisics (check collision, update paths, etc)
+			User input (command pattern)
+			Game logic - simple AI
+			Graphics render in three layers - draw buffer(bitmap), to buffer: preRender(map from bitmap layer), Render(objects layer), PostRender(GUI layer) - to buffer.
+			timer end
+			delay or calculate FPS and Draw time
+		End loop
+		Finalization once
+	Colisions - check if player(movable object) try move to not wallable tile then start broken animation.
+	AI path calculate wia BFS (breadth-first search) and move to player or move in random side until wallable way, until not find player in intersection
+	Commands - turn left/right, move forward/backward, shoot, take damage, stop.
+	Graphics - use primitives like square, line, triangle, circle etc. Use winapi bitblt, bitmaps, gdi.
+		Global params 
+			Tiles count
+			Tile size in px or screen size/resolution
+		Objects 
+			Wall - 0.75 square size from main map tile (filled??)
+			Tank - 0.9 square size from main tile with barrel 0.1 line
+			bullet - 0.25 of tile size or 2.5 of tank barrel length
+		Animation
+			Move forward - from tile to tile.
+			Move forward  to wall - brake, stops and move backward.
+			Turn in one tile.
+			Bullet flying
+			--
+			Shoot
+			Taking damage - bang
+			--
+		GUI
+			Time from start - top,left corner.
+			Score - player kills - top,right corner.
+			Lifes - player have 3 lives from start - top,right corner close Score.
+		Methods
+			Turn bitmap wia plgblt
+			Draw bitmap wia bitblt
+			Translate bitmap wia bitblt
+			Draw objects wia MoveTo,LineTo
+	Классы:
+		Command (pattern)
+		GameObject
+			Graphic
+				Primitive
+				Prerendered	
+		
+		GameObject
+			Point Offcet
+			Point Tile
+		
+		map - array [Tile count, tile count] of GameObjects
+		bullet - Primitive
+		tank - Prerendered
+		wall - Primitive
+				
+	
+	
+	
