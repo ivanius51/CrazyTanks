@@ -32,9 +32,7 @@ class Game
     void stop() {isRunning_ = false;}
 
     MapTile** Tiles;
-    //GameObject* GetTile(size_t row, size_t col) {return Tiles_ + (row * MAXTILES_ + col);}
 
-    //std::vector<std::vector<GameObject*>> Tiles;
     Tank *Player = nullptr;
     unsigned short int Score = 0;
     unsigned short int Lives = 3;

@@ -21,21 +21,6 @@ int main()
 
   Game::instance().Init(GetConsoleWindow(),10);
 
-  //COLORREF WHITE = RGB(255,255,255);
-  //COLORREF DARK_GREEN = RGB(0, 128, 0);
-
-  //HBITMAP hBitmap = static_cast<HBITMAP>(LoadImage(GetModuleHandle(NULL), "mathjoke.bmp", IMAGE_BITMAP, 0,0, LR_LOADFROMFILE));
-  //Graphical *tank;
-  //tank = new Tank(Game::instance().hdc, DARK_GREEN);
-  //tank->Draw();
-  //Draw Tank from Bitmap
-  //int x = 0;
-
-  //cout << (Game::instance().Tiles[9 * Game::instance().MaxTiles() + 5]->GetPosition().x);
-  //tank->Draw();
-  //Game::instance().DrawBitmap(x,0,tank->hBitmap);
-  //x++;
-
   while(Game::instance().running())
   {
     int startTime = GetTickCount();
@@ -51,8 +36,6 @@ int main()
       std::this_thread::sleep_for(std::chrono::milliseconds(FRAME_DELAY - elapsedTime));
     }
   }
-  //delete tank;
-  //delete game;
   Game::instance().Free();
   return 0;
 }

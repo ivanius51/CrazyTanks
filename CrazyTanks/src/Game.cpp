@@ -33,8 +33,6 @@ Game::Init(HWND handle, int maxtiles)
     frameCount = 1;
     updateCount = 1;
 
-    //Tiles[0].push_back(new Tank(hdc, RGB(0, 128, 0), 5, 9));
-
     Tiles = new MapTile*[MAXTILES_*MAXTILES_];
 
     for(int i = 0; i < MAXTILES_; ++i)
@@ -67,7 +65,6 @@ void Game::Free()
         for(int j = 0; j < MAXTILES_; ++j)
           if (Tiles[i * MAXTILES_ + j])
             delete Tiles[i * MAXTILES_ + j];
-  //Tiles.clear();
 }
 
 void Game::InputHandler()
@@ -218,8 +215,6 @@ void Game::SetConsoleWindowSize(int x, int y)
     if (h == INVALID_HANDLE_VALUE)
         throw std::runtime_error("Unable to get stdout handle.");
 
-    // If either dimension is greater than the largest console window we can have,
-    // there is no point in attempting the change.
     {
         COORD largestSize = GetLargestConsoleWindowSize(h);
         if (x > largestSize.X)
@@ -238,7 +233,6 @@ void Game::SetConsoleWindowSize(int x, int y)
 
     if (windowSize.X > x || windowSize.Y > y)
     {
-        // window size needs to be adjusted before the buffer size can be reduced.
         SMALL_RECT info =
         {
             0,
@@ -268,7 +262,7 @@ void Game::ShowConsoleCursor(bool showFlag)
   CONSOLE_CURSOR_INFO     cursorInfo;
 
   GetConsoleCursorInfo(hOut, &cursorInfo);
-  cursorInfo.bVisible = showFlag; // set the cursor visibility
+  cursorInfo.bVisible = showFlag;
   SetConsoleCursorInfo(hOut, &cursorInfo);
 }
 
@@ -284,48 +278,33 @@ void Game::DrawBitmap(HDC hdc, int x, int y, HBITMAP hBitmap, bool transparent)
   BITMAP bm;
   POINT ptSize, ptOrg;
 
-  // —оздаем контекст пам€ти, совместимый
-  // с контекстом отображени€
   hMemDC = CreateCompatibleDC(hdc);
 
-  // ¬ыбираем изображение bitmap в контекст пам€ти
   hOldbm = static_cast<HBITMAP>(SelectObject(hMemDC, hBitmap));
 
-  // ≈сли не было ошибок, продолжаем работу
   if (hOldbm)
   {
-    // ƒл€ контекста пам€ти устанавливаем тот же
-    // режим отображени€, что используетс€ в
-    // контексте отображени€
     SetMapMode(hMemDC, GetMapMode(hdc));
 
-    // ќпредел€ем размеры изображени€
     GetObject(hBitmap, sizeof(BITMAP), (LPSTR) &bm);
 
-    ptSize.x = bm.bmWidth;  // ширина
-    ptSize.y = bm.bmHeight; // высота
+    ptSize.x = bm.bmWidth;
+    ptSize.y = bm.bmHeight;
 
-    // ѕреобразуем координаты устройства в логические
-    // дл€ устройства вывода
     DPtoLP(hdc, &ptSize, 1);
 
     ptOrg.x = 0;
     ptOrg.y = 0;
 
-    // ѕреобразуем координаты устройства в логические
-    // дл€ контекста пам€ти
     DPtoLP(hMemDC, &ptOrg, 1);
 
-    // –исуем изображение bitmap
     if (!transparent)
       BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCCOPY);
     else
       BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCPAINT);
-    //TransparentBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, ptSize.x, ptSize.y, RGB(0,0,0));
-    // ¬осстанавливаем контекст пам€ти
+
     SelectObject(hMemDC, hOldbm);
   }
 
-  // ”дал€ем контекст пам€ти
   DeleteDC(hMemDC);
 }

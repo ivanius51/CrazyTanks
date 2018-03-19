@@ -146,22 +146,14 @@ void Bullet::Update()
     NewPosition.x += (Offset.x+Direction.x*TileSize/2)/TileSize;
     NewPosition.y += (Offset.y+Direction.y*TileSize/2)/TileSize;
     MapTile* NextTile = Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
-    /*if ((abs(Offset.x)>=TileSize-1) || (abs(Offset.y)>=TileSize-1))
-    {
-      InAnimation = !InAnimation;
-      Offset.x = 1;
-      Offset.y = 1;
-
-      if (((NewPosition.x>=0)&&(NewPosition.x<MaxTiles))&&((NewPosition.y>=0)&&(NewPosition.y<MaxTiles))&&(!NextTile || NextTile->IsWalkable))
-        SetPosition(NewPosition);
-    }
-    else*/
     {
       Offset.x += Direction.x;
       Offset.y += Direction.y;
       if (((!(((NewPosition.x>=0)&&(NewPosition.x<MaxTiles))&&((NewPosition.y>=0)&&(NewPosition.y<MaxTiles))) || (NextTile) || (NextTile && NextTile->IsWalkable))))
       {
         InAnimation = !InAnimation;
+        //check and call self destroy
+        //if in newposition - tank - destroy it, add score, or if it player - dec score
       }
     }
   }
@@ -192,6 +184,8 @@ void Tank::DrawTo(HDC ahdc)
 
   HPEN winPen = CreatePen(PS_SOLID,1,LineColor);
   HGDIOBJ penOld = SelectObject(ahdc,winPen);
+
+  //Draw in Direction, but magic numbers still here
 
   //base
   Rectangle(ahdc,4,10,28,28);

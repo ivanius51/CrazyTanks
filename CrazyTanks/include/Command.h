@@ -8,7 +8,7 @@ class Command
   public:
     virtual ~Command();
     virtual void execute() = 0;
-    virtual void execute(GameObject& actor) = 0;
+    virtual void execute(Graphical& actor) = 0;
   protected:
 
   private:
@@ -23,9 +23,10 @@ class FireCommand : public Command
 class MoveForward : public Command
 {
   public:
-      virtual void execute(GameObject& actor)
+      virtual void execute(Graphical& actor)
       {
-        //actor.MoveForward();
+        if (!actor.InAnimation)
+          actor.InAnimation = true;
       }
 };
 

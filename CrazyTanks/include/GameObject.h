@@ -46,8 +46,8 @@ class Graphical : public MapTile
 
     bool InAnimation = false;
 
-    POINT Direction;//координаты для направления движения (поворот)
-    POINT Offset;//смещение от 0,0 тайла для анимации движения
+    POINT Direction;
+    POINT Offset;
 
     HBITMAP GethBitmap() { return hBitmap_; }
   protected:
