@@ -34,14 +34,14 @@
 1521363899 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\command.cpp
 	"Command.h"
 
-1521420046 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\command.h
+1521449374 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\command.h
 	<GameObject.h>
 
-1521447297 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\gameobject.h
+1521452726 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\gameobject.h
 	<sstream>
 	<windows.h>
 
-1521448362 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\gameobject.cpp
+1521454094 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\gameobject.cpp
 	"GameObject.h"
 	<cmath>
 	<Game.h>
@@ -59,7 +59,7 @@
 	<windows.h>
 	<GameObject.h>
 
-1521448554 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\game.cpp
+1521449025 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\game.cpp
 	"Game.h"
 	<sstream>
 	<string>

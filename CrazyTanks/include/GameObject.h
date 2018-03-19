@@ -70,15 +70,19 @@ class Wall : public Graphical
     void Update(){;}
 };
 
+class Tank;
+
 class Bullet : public Graphical
 {
   public:
-    Bullet(HDC ahdc, COLORREF aLineColor, int x, int y);
+    Bullet(HDC ahdc, COLORREF aLineColor, int x, int y, Tank* AShooter);
     void Draw() override;
     void DrawTo(HDC ahdc) override;
     //void DrawToBuffer() override;
     void ClearBuffer() override;
     void Update() override;
+  private:
+    Tank* Shooter;
 };
 
 class Tank : public Graphical

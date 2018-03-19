@@ -3,6 +3,9 @@
 #include <cmath>
 #include <Game.h>
 
+template <typename T> int sgn(T val) {
+    return (val > 0) ? 1 : ((val < 0) ? -1 : 0);
+}
 
 GameObject::GameObject()
 {
@@ -113,11 +116,12 @@ void Wall::Draw()
   Game::instance().DrawBitmap(TileSize*Position_.x + 1, TileSize*Position_.y + 1, hBitmap_);
 }
 
-Bullet::Bullet(HDC ahdc, COLORREF aLineColor, int x, int y)
+Bullet::Bullet(HDC ahdc, COLORREF aLineColor, int x, int y, Tank* AShooter)
   :Graphical(ahdc,aLineColor, x, y)
 {
   IsWalkable = true;
   IsMovable = true;
+  Shooter = AShooter;
 }
 void Bullet::ClearBuffer()
 {
@@ -166,25 +170,36 @@ void Bullet::Update()
       Offset.y += Direction.y;
       if ((NextTile) || (NextTile && NextTile->IsWalkable))
       {
-        InAnimation = false;
         //check and call self destroy
-        ClearBuffer();
-        //if in newposition - tank - destroy it, add score, or if it player - dec score
+        //ClearBuffer();
+
+        //bullet collision with tank
         if (NextTile && dynamic_cast<Tank*>(NextTile))
         {
-          if (NextTile!=Game::instance().Player)
+          //Enemy bullet
+          if (Shooter==Game::instance().Player && NextTile!=this)
           {
+            //InAnimation = false;//if need stop bullet on enemy tank
             delete Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
             Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y] = nullptr;
             Game::instance().Score++;
           }
           else
+          //Player bullet
+          if (NextTile==Game::instance().Player &&
+              //check player is outway animation
+              !(((Game::instance().Player->Direction.x==Direction.y)||(Game::instance().Player->Direction.y==Direction.x)) &&
+                Game::instance().Player->InAnimation && ((abs(Game::instance().Player->Offset.x)+abs(Game::instance().Player->Offset.y))>TileSize/3)))
           {
+            InAnimation = false;
             Game::instance().Lives --;
             if (Game::instance().Lives<=0)
               Game::instance().stop();
           }
         }
+        else
+        //bullet collision with other
+          InAnimation = false;
       }
     }
     else
@@ -259,6 +274,18 @@ void Tank::Update()
 {
   if (DrawDirection_.x!=Direction.x || DrawDirection_.y!=Direction.y)
     ClearBuffer();
+
+  if (this != Game::instance().Player)
+  {
+    POINT Position = Game::instance().Player->GetPosition();
+    if ((Position.x==Position_.x)||(Position.y==Position_.y))
+    {
+      Direction.x = sgn(Position.x-Position_.x);
+      Direction.y = sgn(Position.y-Position_.y);
+      this->Shoot();
+    }
+  }
+
   int TileSize = Game::instance().TileSize();
   int MaxTiles = Game::instance().MaxTiles();
   if (InAnimation)
@@ -309,7 +336,7 @@ void Tank::Shoot()
   }
   if (!bullet || !bullet->InAnimation)
   {
-    bullet = new Bullet(hdc,LineColor,GetPosition().x+Direction.x,GetPosition().y+Direction.y);
+    bullet = new Bullet(hdc,LineColor,GetPosition().x+Direction.x,GetPosition().y+Direction.y, this);
     bullet->Offset.y = -Direction.y*(TileSize/2);
     bullet->Offset.x = -Direction.x*(TileSize/2);
     bullet->Direction = Direction;

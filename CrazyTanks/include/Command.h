@@ -8,7 +8,7 @@ class Command
   public:
     virtual ~Command();
     virtual void execute() = 0;
-    virtual void execute(Graphical& actor) = 0;
+    virtual void execute(Tank& tank) = 0;
   protected:
 
   private:
@@ -17,7 +17,10 @@ class Command
 class FireCommand : public Command
 {
   public:
-      virtual void execute() {  };
+      virtual void execute(Tank& tank)
+      {
+        tank.Shoot();
+      };
 };
 
 class MoveForward : public Command
