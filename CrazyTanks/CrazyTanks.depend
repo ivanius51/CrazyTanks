@@ -1,0 +1,71 @@
+# depslib dependency file v1.0
+1521359893 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\main.cpp
+	<windows.h>
+	<iostream>
+	<cmath>
+
+1521233195 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\src\gameobject.cpp
+	"GameObject.h"
+
+1521362632 c:\users\Макс\desktop\crazytanks\source\crazytanks\include\gameobject.h
+	<windows.h>
+
+1521357755 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\src\graphic.cpp
+	"Graphic.h"
+
+1521357938 c:\users\Макс\desktop\crazytanks\source\crazytanks\include\graphic.h
+
+1521359322 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\src\command.cpp
+	"Command.h"
+
+1521359305 c:\users\Макс\desktop\crazytanks\source\crazytanks\include\command.h
+	<GameObject.h>
+
+1521362184 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\src\globalvariables.cpp
+
+1521417932 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\main.cpp
+	<chrono>
+	<thread>
+	<iostream>
+	<windows.h>
+	<GameObject.h>
+	<Game.h>
+
+1521363899 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\command.cpp
+	"Command.h"
+
+1521374499 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\command.h
+	<GameObject.h>
+
+1521415796 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\gameobject.h
+	<sstream>
+	<windows.h>
+
+1521416994 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\gameobject.cpp
+	"GameObject.h"
+	<cmath>
+	<Game.h>
+
+1521394499 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\globalvariables.h
+
+1521363899 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\world.cpp
+	"World.h"
+
+1521363896 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\world.h
+	<GlobalVariables.h>
+
+1521418074 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\game.h
+	<vector>
+	<windows.h>
+	<GameObject.h>
+
+1521418146 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\game.cpp
+	"Game.h"
+	<sstream>
+	<string>
+	<iostream>
+	<stdexcept>
+	<stdlib.h>
+	<windows.h>
+	<conio.h>
+
