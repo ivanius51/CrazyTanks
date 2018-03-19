@@ -23,7 +23,7 @@
 
 1521362184 source:c:\users\Макс\desktop\crazytanks\source\crazytanks\src\globalvariables.cpp
 
-1521417932 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\main.cpp
+1521419654 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\main.cpp
 	<chrono>
 	<thread>
 	<iostream>
@@ -37,11 +37,11 @@
 1521420046 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\command.h
 	<GameObject.h>
 
-1521419738 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\gameobject.h
+1521447297 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\gameobject.h
 	<sstream>
 	<windows.h>
 
-1521416994 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\gameobject.cpp
+1521448362 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\gameobject.cpp
 	"GameObject.h"
 	<cmath>
 	<Game.h>
@@ -54,12 +54,12 @@
 1521363896 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\world.h
 	<GlobalVariables.h>
 
-1521418074 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\game.h
+1521445408 c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\include\game.h
 	<vector>
 	<windows.h>
 	<GameObject.h>
 
-1521418146 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\game.cpp
+1521448554 source:c:\users\pc\yandexdisk\Текущие\c++\crazytanks\source\crazytanks\src\game.cpp
 	"Game.h"
 	<sstream>
 	<string>

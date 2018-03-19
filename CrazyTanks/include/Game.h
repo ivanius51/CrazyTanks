@@ -23,7 +23,9 @@ class Game
     HWND hwnd = 0;
 
     HBITMAP buffer = 0;
+    HDC bufferDC = 0;
     HBITMAP mapLayer = 0;
+    HDC mapLayerDC = 0;
 
     unsigned short int MaxTiles(){return MAXTILES_;}
     unsigned short int TileSize(){return TILESIZE_;}

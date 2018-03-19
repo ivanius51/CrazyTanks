@@ -30,8 +30,8 @@ class MapTile : public GameObject
     bool IsMovable = false;
     bool IsWalkable = true;
 
-    POINT GetPosition() { return Position_; }
-    void SetPosition(POINT val) { Position_ = val; }
+    POINT GetPosition();
+    void SetPosition(POINT val);
   protected:
     POINT Position_;
   private:
@@ -46,12 +46,15 @@ class Graphical : public MapTile
 
     bool InAnimation = false;
 
+    void DrawToBuffer();
+
     POINT Direction;
     POINT Offset;
 
     HBITMAP GethBitmap() { return hBitmap_; }
   protected:
     HBITMAP hBitmap_ = 0;
+    POINT DrawDirection_;
     COLORREF LineColor;
     HDC hdc;
 };
@@ -62,7 +65,7 @@ class Wall : public Graphical
     Wall(HDC ahdc, COLORREF aLineColor, int x, int y);
     void Draw() override;
     void DrawTo(HDC ahdc) override;
-    void DrawToBuffer(){;}
+    //void DrawToBuffer(){;}
     void ClearBuffer(){;}
     void Update(){;}
 };
@@ -73,7 +76,7 @@ class Bullet : public Graphical
     Bullet(HDC ahdc, COLORREF aLineColor, int x, int y);
     void Draw() override;
     void DrawTo(HDC ahdc) override;
-    void DrawToBuffer() override;
+    //void DrawToBuffer() override;
     void ClearBuffer() override;
     void Update() override;
 };
@@ -82,9 +85,10 @@ class Tank : public Graphical
 {
   public:
     Tank(HDC ahdc, COLORREF aLineColor, int x, int y);
+    ~Tank();
     void Draw() override;
     void DrawTo(HDC ahdc) override;
-    void DrawToBuffer() override;
+    //void DrawToBuffer() override;
     void ClearBuffer() override;
     void Shoot();
     void Update();

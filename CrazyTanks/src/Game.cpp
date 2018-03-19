@@ -35,18 +35,30 @@ Game::Init(HWND handle, int maxtiles)
 
     Tiles = new MapTile*[MAXTILES_*MAXTILES_];
 
+    bufferDC = CreateCompatibleDC(hdc);
+    buffer = CreateCompatibleBitmap(bufferDC,320,340);
+    SelectObject(bufferDC,buffer);
+    BitBlt(bufferDC,0,0,320,340,bufferDC,0,0,BLACKNESS);
+
     for(int i = 0; i < MAXTILES_; ++i)
       for(int j = 0; j < MAXTILES_; ++j)
-      //create walls
-        if ((rand()%100) < 20)
+      {
+        int random = (rand()%100);
+        //create walls
+        if (random < 20)
           Tiles[i * MAXTILES_ + j] = new Wall(hdc, RGB(0, 0, 128), i, j);
         else
+          //create enemys
+        if (random < 25)
+          Tiles[i * MAXTILES_ + j] = new Tank(hdc, RGB(128, 0, 0), i, j);
+        else
           Tiles[i * MAXTILES_ + j] = nullptr;
+      }
 
     RenderMap();
 
     Player = new Tank(hdc, RGB(0, 128, 0), 5, 9);
-    Tiles[9 * MAXTILES_ + 5] = Player;
+    Tiles[5 * MAXTILES_ + 9] = Player;
 
     isRunning_ = true;
     StartTime=GetTickCount();
@@ -59,6 +71,26 @@ void Game::Free()
   {
     BitBlt(hdc,0,0,320,322,hdc,0,0,BLACKNESS);
     ReleaseDC(hwnd, hdc);
+  }
+  if (bufferDC)
+  {
+    DeleteDC(bufferDC);
+    bufferDC = 0;
+  }
+  if (mapLayerDC)
+  {
+    DeleteDC(mapLayerDC);
+    mapLayerDC = 0;
+  }
+  if (buffer)
+  {
+    DeleteObject(buffer);
+    buffer = 0;
+  }
+  if (mapLayer)
+  {
+    DeleteObject(mapLayer);
+    mapLayer = 0;
   }
   system("cls");
   for(int i = 0; i < MAXTILES_; ++i)
@@ -139,30 +171,31 @@ void Game::RenderMap()
 {
   if (!mapLayer)
   {
-    HDC bmpDc = CreateCompatibleDC(hdc);
+    mapLayerDC = CreateCompatibleDC(hdc);
     mapLayer = CreateCompatibleBitmap(hdc,320,322);
-    HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(bmpDc,mapLayer));
+    HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(mapLayerDC,mapLayer));
     if (hOldBitmap)
     {
       BitBlt(hdc,0,0,320,322,hdc,0,0,BLACKNESS);
       HPEN winPen = CreatePen(PS_SOLID,1,RGB(128,128,128));
-      HGDIOBJ penOld = SelectObject(bmpDc,winPen);
+      HGDIOBJ penOld = SelectObject(mapLayerDC,winPen);
       HBRUSH winBrush = CreateSolidBrush(RGB(0,0,0));
-      HGDIOBJ brushOld = SelectObject(bmpDc,winBrush);
-      Rectangle(bmpDc,0,0,320,322);
+      HGDIOBJ brushOld = SelectObject(mapLayerDC,winBrush);
+      Rectangle(mapLayerDC,0,0,320,322);
       //SelectObject(bmpDc,brushOld);
-      SelectObject(bmpDc,penOld);
+      SelectObject(mapLayerDC,penOld);
 
       for(int i = 0; i < MAXTILES_; ++i)
         for(int j = 0; j < MAXTILES_; ++j)
           if (Tiles[i * MAXTILES_ + j] && dynamic_cast<Wall*>(Tiles[i * MAXTILES_ + j]))
           {
             dynamic_cast<Wall*>(Tiles[i * MAXTILES_ + j])->Draw();
-            DrawBitmap(bmpDc,TILESIZE_*i + 1, TILESIZE_*j + 1,dynamic_cast<Wall*>(Tiles[i * MAXTILES_ + j])->GethBitmap());
+            DrawBitmap(mapLayerDC,TILESIZE_*i + 1, TILESIZE_*j + 1,dynamic_cast<Wall*>(Tiles[i * MAXTILES_ + j])->GethBitmap());
           }
-      SelectObject(bmpDc,hOldBitmap);
+      SelectObject(mapLayerDC,hOldBitmap);
     }
-    DeleteDC(bmpDc);
+    //DeleteDC(mapLayerDC);
+    //mapLayerDC = 0;
   }
 }
 
@@ -170,7 +203,7 @@ void Game::PreRender()
 {
   system("cls");
   //BitBlt(hdc,0,0,320,340,hdc,0,0,BLACKNESS);//WHITENESS
-  DrawBitmap(0,0,mapLayer);
+  DrawBitmap(hdc,0,0,mapLayer);
 }
 
 void Game::Render()
@@ -181,6 +214,20 @@ void Game::Render()
         Tiles[i * MAXTILES_ + j]->Draw();
 }
 
+/*
+void Game::Render()
+{
+  for(int i = 0; i < MAXTILES_; ++i)
+    for(int j = 0; j < MAXTILES_; ++j)
+      if (Tiles[i * MAXTILES_ + j] && dynamic_cast<Tank*>(Tiles[i * MAXTILES_ + j]))
+      {
+        Tiles[i * MAXTILES_ + j]->DrawToBuffer();
+        DrawBitmap(hdc,TILESIZE_*i + dynamic_cast<Tank*>(Tiles[i * MAXTILES_ + j])->Offset.x, TILESIZE_*j + dynamic_cast<Tank*>(Tiles[i * MAXTILES_ + j])->Offset.y,dynamic_cast<Tank*>(Tiles[i * MAXTILES_ + j])->GethBitmap(), true);
+      }
+  //Player->Draw();
+  //BitBlt(hdc,0,0,320,322,bufferDC,0,0,SRCPAINT);
+}*/
+
 void Game::PostRender()
 {
   //BitBlt(hdc,0,322,320,18,hdc,0,0,BLACKNESS);
@@ -189,23 +236,27 @@ void Game::PostRender()
   int Sec = (Time / 1000)%60;
   int Min = ((Time / 60000) % 60);
   std::string strTime = "Time "+SSTR(Min)+":"+SSTR(Sec);
-  TextOut(hdc,0,321,strTime.c_str(),strTime.length());
+  TextOut(hdc,0,322,strTime.c_str(),strTime.length());
 
   SIZE textsize;
   int indentx = 2;
   std::string strLifes = "Score:"+SSTR(Score)+" Lives:"+SSTR(Lives);//+to_string(Lives);
   GetTextExtentPoint32(hdc,strLifes.c_str(),strLifes.length(),&textsize);
   indentx += textsize.cx;
-  TextOut(hdc,320-indentx,321,strLifes.c_str(),strLifes.length());
+  TextOut(hdc,320-indentx,322,strLifes.c_str(),strLifes.length());
   TextOut(hdc,340,340,"0",1);//test
+
+  //BitBlt(hdc,0,0,320,340,bufferDC,0,0,SRCPAINT);
 }
 
 void Game::Draw()
 {
   frameCount++;
+  //must be all this draw to buffer
   PreRender();
   Render();
   PostRender();
+  //and here draw from buffer for remove flikering
 }
 
 void Game::SetConsoleWindowSize(int x, int y)
@@ -273,38 +324,41 @@ void Game::DrawBitmap(int x, int y, HBITMAP hBitmap, bool transparent)
 
 void Game::DrawBitmap(HDC hdc, int x, int y, HBITMAP hBitmap, bool transparent)
 {
-  HBITMAP hOldbm;
-  HDC hMemDC;
-  BITMAP bm;
-  POINT ptSize, ptOrg;
-
-  hMemDC = CreateCompatibleDC(hdc);
-
-  hOldbm = static_cast<HBITMAP>(SelectObject(hMemDC, hBitmap));
-
-  if (hOldbm)
+  if (hBitmap)
   {
-    SetMapMode(hMemDC, GetMapMode(hdc));
+    HBITMAP hOldbm;
+    HDC hMemDC;
+    BITMAP bm;
+    POINT ptSize, ptOrg;
 
-    GetObject(hBitmap, sizeof(BITMAP), (LPSTR) &bm);
+    hMemDC = CreateCompatibleDC(hdc);
 
-    ptSize.x = bm.bmWidth;
-    ptSize.y = bm.bmHeight;
+    hOldbm = static_cast<HBITMAP>(SelectObject(hMemDC, hBitmap));
 
-    DPtoLP(hdc, &ptSize, 1);
+    if (hOldbm)
+    {
+      SetMapMode(hMemDC, GetMapMode(hdc));
 
-    ptOrg.x = 0;
-    ptOrg.y = 0;
+      GetObject(hBitmap, sizeof(BITMAP), (LPSTR) &bm);
 
-    DPtoLP(hMemDC, &ptOrg, 1);
+      ptSize.x = bm.bmWidth;
+      ptSize.y = bm.bmHeight;
 
-    if (!transparent)
-      BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCCOPY);
-    else
-      BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCPAINT);
+      DPtoLP(hdc, &ptSize, 1);
 
-    SelectObject(hMemDC, hOldbm);
+      ptOrg.x = 0;
+      ptOrg.y = 0;
+
+      DPtoLP(hMemDC, &ptOrg, 1);
+
+      if (!transparent)
+        BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCCOPY);
+      else
+        BitBlt(hdc, x, y, ptSize.x, ptSize.y, hMemDC, ptOrg.x, ptOrg.y, SRCPAINT);
+
+      SelectObject(hMemDC, hOldbm);
+    }
+
+    DeleteDC(hMemDC);
   }
-
-  DeleteDC(hMemDC);
 }

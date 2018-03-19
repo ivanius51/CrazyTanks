@@ -14,10 +14,26 @@ GameObject::~GameObject()
 
 }
 */
+
 MapTile::MapTile(int x, int y)
 {
   Position_.x = x;
   Position_.y = y;
+}
+POINT MapTile::GetPosition()
+{
+  return Position_;
+}
+void MapTile::SetPosition(POINT val)
+{
+  int MaxTiles = Game::instance().MaxTiles();
+  if (!Game::instance().Tiles[val.x * MaxTiles + val.y])
+  {
+    Game::instance().Tiles[val.x * MaxTiles + val.y] = this;
+    if (Game::instance().Tiles[Position_.x * MaxTiles + Position_.y])
+      Game::instance().Tiles[Position_.x * MaxTiles + Position_.y] = nullptr;
+    Position_ = val;
+  }
 }
 
 Graphical::Graphical(HDC ahdc, COLORREF aLineColor, int x, int y)
@@ -34,7 +50,21 @@ Graphical::Graphical(HDC ahdc, COLORREF aLineColor, int x, int y)
   Offset.x = 1;
   Offset.y = 1;
 }
-
+void Graphical::DrawToBuffer()
+{
+  if (hBitmap_==0)
+  {
+    HDC bmpDc = CreateCompatibleDC(hdc);
+    hBitmap_ = CreateCompatibleBitmap(hdc,32,32);
+    HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(bmpDc,hBitmap_));
+    if (hOldBitmap)
+    {
+      DrawTo(bmpDc);
+      SelectObject(bmpDc,hOldBitmap);
+    }
+    DeleteDC(bmpDc);
+  }
+}
 Graphical::~Graphical()
 {
   if (hBitmap_!=0)
@@ -89,11 +119,6 @@ Bullet::Bullet(HDC ahdc, COLORREF aLineColor, int x, int y)
   IsWalkable = true;
   IsMovable = true;
 }
-void Bullet::DrawToBuffer()
-{
-  ClearBuffer();
-  Draw();
-}
 void Bullet::ClearBuffer()
 {
   if (hBitmap_!=0)
@@ -110,30 +135,19 @@ void Bullet::DrawTo(HDC ahdc)
   HGDIOBJ penOld = SelectObject(ahdc,winPen);
 
   //weapon
-  Rectangle(ahdc,14,10,17,22);
+  //Rectangle(ahdc,14,10,17,22);
+  int width = 3 / 2;
+  int height = 12 / 2;
+
+  Rectangle(ahdc,16 - width - (Direction.x * height),16 - width - (Direction.y * height),16 + width + (Direction.x * height),16 + width + (Direction.y * height));
 
   SelectObject(ahdc,penOld);
 }
 void Bullet::Draw()
 {
-  if (hBitmap_==0)
-  {
-    //Draw Bullet to bitmap
-    HDC bmpDc = CreateCompatibleDC(hdc);
-    hBitmap_ = CreateCompatibleBitmap(hdc,32,32);
-    HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(bmpDc,hBitmap_));
-    if (hOldBitmap)
-    {
-      DrawTo(bmpDc);
-      SelectObject(bmpDc,hOldBitmap);
-    }
-    DeleteDC(bmpDc);
-  }
-  else
-  {
-    int TileSize = Game::instance().TileSize();
-    Game::instance().DrawBitmap(TileSize*Position_.x + Offset.x, TileSize*Position_.y + Offset.y, hBitmap_, true);
-  }
+  DrawToBuffer();
+  int TileSize = Game::instance().TileSize();
+  Game::instance().DrawBitmap(TileSize*Position_.x + Offset.x, TileSize*Position_.y + Offset.y, hBitmap_, true);
 }
 
 void Bullet::Update()
@@ -145,30 +159,49 @@ void Bullet::Update()
     POINT NewPosition = GetPosition();
     NewPosition.x += (Offset.x+Direction.x*TileSize/2)/TileSize;
     NewPosition.y += (Offset.y+Direction.y*TileSize/2)/TileSize;
-    MapTile* NextTile = Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
+    if (((NewPosition.x>=0)&&(NewPosition.x<MaxTiles))&&((NewPosition.y>=0)&&(NewPosition.y<MaxTiles)))
     {
+      MapTile* NextTile = Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
       Offset.x += Direction.x;
       Offset.y += Direction.y;
-      if (((!(((NewPosition.x>=0)&&(NewPosition.x<MaxTiles))&&((NewPosition.y>=0)&&(NewPosition.y<MaxTiles))) || (NextTile) || (NextTile && NextTile->IsWalkable))))
+      if ((NextTile) || (NextTile && NextTile->IsWalkable))
       {
-        InAnimation = !InAnimation;
+        InAnimation = false;
         //check and call self destroy
+        ClearBuffer();
         //if in newposition - tank - destroy it, add score, or if it player - dec score
+        if (NextTile && dynamic_cast<Tank*>(NextTile))
+        {
+          if (NextTile!=Game::instance().Player)
+          {
+            delete Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
+            Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y] = nullptr;
+            Game::instance().Score++;
+          }
+          else
+          {
+            Game::instance().Lives --;
+            if (Game::instance().Lives<=0)
+              Game::instance().stop();
+          }
+        }
       }
     }
+    else
+      InAnimation = false;
   }
 }
 
+Tank::~Tank()
+{
+  if (bullet)
+    delete bullet;
+}
 Tank::Tank(HDC ahdc, COLORREF aLineColor, int x, int y)
   :Graphical(ahdc,aLineColor, x, y)
 {
   IsWalkable = false;
   IsMovable = true;
-}
-void Tank::DrawToBuffer()
-{
-  ClearBuffer();
-  Draw();
 }
 void Tank::ClearBuffer()
 {
@@ -186,46 +219,46 @@ void Tank::DrawTo(HDC ahdc)
   HGDIOBJ penOld = SelectObject(ahdc,winPen);
 
   //Draw in Direction, but magic numbers still here
+  DrawDirection_ = Direction;
 
-  //base
+  int width = 6;
+  int height = 12;
+  Rectangle(ahdc,16 - width*((Direction.x < 0) ? 1 : 2),16 - width*((Direction.y < 0) ? 1 : 2),16 + width*((Direction.x > 0) ? 1 : 2),16 + width*((Direction.y > 0) ? 1 : 2));
+  /*//base
+  //0,-1
   Rectangle(ahdc,4,10,28,28);
+  //0,1
+  Rectangle(ahdc,4,4,28,20);
   //left
   MoveToEx(ahdc,8,10,nullptr);
   LineTo(ahdc,8,28);
   //right
   MoveToEx(ahdc,23,10,nullptr);
   LineTo(ahdc,23,28);
-  //weapon
-  Rectangle(ahdc,14,4,17,16);
   //top hole
-  Arc(ahdc,11,15,20,24,11,15,11,15);
+  Arc(ahdc,11,15,20,24,11,15,11,15);*/
+  //weapon
+  width = 2;
+  if (Direction.x == 0)
+    Rectangle(ahdc,14,16 - height*((Direction.y < 0) ? 0 : -1),17,16 + height*((Direction.y > 0) ? 0 : -1));
+  else
+    Rectangle(ahdc,16 - height*((Direction.x < 0) ? 0 : -1),14,16 + height*((Direction.x > 0) ? 0 : -1),17);
 
   SelectObject(ahdc,penOld);
 }
 void Tank::Draw()
 {
-  if (hBitmap_==0)
-  {
-    //Draw Tank to bitmap
-    HDC bmpDc = CreateCompatibleDC(hdc);
-    hBitmap_ = CreateCompatibleBitmap(hdc,32,32);
-    HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(bmpDc,hBitmap_));
-    if (hOldBitmap)
-    {
-      DrawTo(bmpDc);
-      SelectObject(bmpDc,hOldBitmap);
-    }
-    DeleteDC(bmpDc);
-  }
-  else
-  {
-    int TileSize = Game::instance().TileSize();
-    Game::instance().DrawBitmap(TileSize*Position_.x + Offset.x, TileSize*Position_.y + Offset.y, hBitmap_, true);
-  }
+  DrawToBuffer();
+  int TileSize = Game::instance().TileSize();
+  Game::instance().DrawBitmap(hdc,TileSize*Position_.x + Offset.x, TileSize*Position_.y + Offset.y, hBitmap_, true);
+  if (bullet)
+    bullet->Draw();
 }
 
 void Tank::Update()
 {
+  if (DrawDirection_.x!=Direction.x || DrawDirection_.y!=Direction.y)
+    ClearBuffer();
   int TileSize = Game::instance().TileSize();
   int MaxTiles = Game::instance().MaxTiles();
   if (InAnimation)
@@ -236,7 +269,7 @@ void Tank::Update()
     MapTile* NextTile = Game::instance().Tiles[NewPosition.x * MaxTiles + NewPosition.y];
     if ((abs(Offset.x)>=TileSize-1) || (abs(Offset.y)>=TileSize-1))
     {
-      InAnimation = !InAnimation;
+      InAnimation = false;
       Offset.x = 1;
       Offset.y = 1;
 
@@ -249,10 +282,19 @@ void Tank::Update()
       Offset.y += Direction.y;
       if (((!(((NewPosition.x>=0)&&(NewPosition.x<MaxTiles))&&((NewPosition.y>=0)&&(NewPosition.y<MaxTiles))) || (NextTile) || (NextTile && NextTile->IsWalkable)))&&(abs(Offset.x)>=(TileSize/5) || abs(Offset.y)>=(TileSize/5)))
       {
-        InAnimation = !InAnimation;
+        InAnimation = false;
         Offset.x = 1;
         Offset.y = 1;
       }
+    }
+  }
+  if (bullet)
+  {
+    bullet->Update();
+    if (!bullet->InAnimation)
+    {
+      delete bullet;
+      bullet = nullptr;
     }
   }
 }
@@ -260,16 +302,17 @@ void Tank::Update()
 void Tank::Shoot()
 {
   int TileSize = Game::instance().TileSize();
+  int MaxTiles = Game::instance().MaxTiles();
   if (bullet && !bullet->InAnimation)
   {
     delete bullet;
   }
   if (!bullet || !bullet->InAnimation)
   {
-    bullet = new Bullet(hdc,RGB(0,255,0),GetPosition().x+Direction.x,GetPosition().y+Direction.y);
+    bullet = new Bullet(hdc,LineColor,GetPosition().x+Direction.x,GetPosition().y+Direction.y);
     bullet->Offset.y = -Direction.y*(TileSize/2);
+    bullet->Offset.x = -Direction.x*(TileSize/2);
     bullet->Direction = Direction;
     bullet->InAnimation = true;
-    Game::instance().Tiles[GetPosition().x+Direction.x * GetPosition().y+Direction.y] = bullet;
   }
 }
