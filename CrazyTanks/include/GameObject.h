@@ -20,6 +20,11 @@ class GameObject
     virtual void Update() = 0;
 
     bool IsEmpty = true;
+
+    UINT UpdateDelay = 0;
+
+  protected:
+    UINT UpdateTime_;
 };
 
 class MapTile : public GameObject
@@ -96,6 +101,10 @@ class Tank : public Graphical
     void ClearBuffer() override;
     void Shoot();
     void Update();
+
+    UINT ShootDelay;
+  protected:
+    UINT ShootTime_;
     Bullet* bullet;
 };
 #endif // GAMEOBJECT_H

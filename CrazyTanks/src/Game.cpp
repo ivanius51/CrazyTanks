@@ -50,7 +50,11 @@ Game::Init(HWND handle, int maxtiles)
         else
           //create enemys
         if (random < 25)
+        {
           Tiles[i * MAXTILES_ + j] = new Tank(hdc, RGB(128, 0, 0), i, j);
+          Tiles[i * MAXTILES_ + j]->UpdateDelay = 1250 + rand()%750;
+          dynamic_cast<Tank*>(Tiles[i * MAXTILES_ + j])->ShootDelay = 250;// + rand()%750;
+        }
         else
           Tiles[i * MAXTILES_ + j] = nullptr;
       }
